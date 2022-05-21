@@ -1,0 +1,14 @@
+<component name="CopyrightManager">
+  <settings default="Finger">
+    <module2copyright>
+      <element module="All" copyright="Finger" />
+    </module2copyright>
+    <LanguageOptions name="JAVA">
+      <option name="fileLocation" value="3" />
+    </LanguageOptions>
+    <LanguageOptions name="__TEMPLATE__">
+      <option name="separateBefore" value="true" />
+      <option name="lenBefore" value="1" />
+    </LanguageOptions>
+  </settings>
+</component>
