@@ -21,8 +21,8 @@ public class SentimentDto {
     private static String[] LABELS_ZH;
 
     static {
-        LABELS_EN = Config.SentimentLabel5En();
-        LABELS_ZH = Config.SentimentLabel5Zh();
+        LABELS_EN = Config.SentimentLabel8En();
+        LABELS_ZH = Config.SentimentLabel8Zh();
     }
 
     private SentimentDto(){}

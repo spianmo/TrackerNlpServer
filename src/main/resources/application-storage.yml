@@ -1,0 +1,5 @@
+storage:
+  oss:
+    domain: http://121.37.168.242/  #提供访问的域名
+    upload-folder: /home/nnu/oss #文件存放的位置
+    access-path-pattern: oss  # 文件访问路径前缀 这里更改domain也需要更改

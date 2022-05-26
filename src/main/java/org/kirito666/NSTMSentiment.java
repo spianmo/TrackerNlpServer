@@ -49,7 +49,7 @@ public class NSTMSentiment {
     public static void readDict() {
         List<String> s;
         try {
-            s = FileUtils.readLines(new File(Config.CoreDictionaryPath()), "UTF-8");
+            s = FileUtils.readLines(new File(Config.CoreDictionary5Path()), "UTF-8");
             for (String str : s) {
                 String key = str.split(":")[0];
                 int value = Integer.parseInt(str.split(":")[1]);

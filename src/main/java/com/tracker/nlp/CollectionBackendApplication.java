@@ -1,0 +1,28 @@
+package com.tracker.nlp;
+
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
+/**
+ * Copyright (c) 2022
+ *
+ * @Project: CollectionBackend
+ * @Author: Finger
+ * @FileName: CollectionBackendApplication.java
+ * @LastModified: 2022/01/12 20:50:12
+ */
+
+@SpringBootApplication
+@EnableCaching
+@EnableScheduling
+@MapperScan("com.tracker.nlp.mapper")
+public class CollectionBackendApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(CollectionBackendApplication.class, args);
+    }
+
+}
