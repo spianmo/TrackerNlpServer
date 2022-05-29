@@ -1,31 +1,35 @@
-package org.kirito666;
+package com.tracker.nlp.service.impl;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import cn.hutool.core.util.StrUtil;
 import com.hankcs.hanlp.seg.common.Term;
-import lombok.ToString;
+import com.tracker.nlp.config.mongo.MongoDBUtil;
+import com.tracker.nlp.dto.IMAccount;
+import com.tracker.nlp.dto.IMGroup;
+import com.tracker.nlp.dto.MsgPack;
+import com.tracker.nlp.service.SentimentService;
 import me.xiaosheng.chnlp.AHANLP;
 import org.apache.commons.io.FileUtils;
 import org.kirito666.sentiment.Config;
 import org.kirito666.sentiment.SentimentDto;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.stereotype.Service;
 import org.tensorflow.Graph;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-/**
- * @author Finger
- */
-@ToString
-public class NSTMSentiment {
+@Service
+public class SentimentServiceImpl implements SentimentService {
+
     private static final Map<String, Integer> VECTOR_DICTIONARY = new HashMap<>();
     private static final Graph model;
 
@@ -43,8 +47,6 @@ public class NSTMSentiment {
         for (Term term : nlpSegResult) {
             input[0][count++] = vectorDict.getOrDefault(term.word, 0);
         }
-        System.out.println("Word2VectorDimInput:");
-        System.out.println(Arrays.toString(input[0]));
         return Tensor.create(input);
     }
 
@@ -73,7 +75,9 @@ public class NSTMSentiment {
         return null;
     }
 
-    public static SentimentDto classify8(String inputText){
+
+    @Override
+    public SentimentDto classify8(String inputText) {
         Tensor<?> input = transformer(inputText, VECTOR_DICTIONARY);
         System.out.println(input);
         try (Session s = new Session(model);
@@ -83,19 +87,53 @@ public class NSTMSentiment {
             float[][] copy = new float[1][labels];
             output.copyTo(copy);
             float[] result = copy[0];
-            SentimentDto sentimentDto = SentimentDto.analysis(result);
-            System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(sentimentDto));
-            return sentimentDto;
+            return SentimentDto.analysis(result);
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        Scanner scanner = new Scanner(System.in);
-        classify8("开心");
-//        while (true){
-//            String lineContent = scanner.nextLine();
-//            classify5(lineContent);
-//        }
+    @Override
+    public boolean isExistGroup(String groupNum) {
+        Long result = MongoDBUtil.countRangeCondition(IMGroup.class, "group", new Criteria(), new LinkedHashMap<String, Object>() {{
+            put("_id", groupNum);
+        }});
+        return result > 0;
+    }
 
+    @Override
+    public boolean isExistIMAccount(String accountNum) {
+        Long result = MongoDBUtil.countRangeCondition(IMAccount.class, "im_account", new Criteria(), new LinkedHashMap<String, Object>() {{
+            put("_id", accountNum);
+        }});
+        return result > 0;
+    }
+
+    @Override
+    public void updateGroup(MsgPack msgPack) {
+        String groupNum = String.valueOf(msgPack.getGroupId());
+        if (!StrUtil.isEmpty(groupNum) && !groupNum.equals("0")) {
+            MongoDBUtil.saveOne("group", IMGroup.builder()
+                    .groupId(groupNum)
+                    .groupName(msgPack.getGroupName())
+                    .build());
+        }
+    }
+
+    @Override
+    public void updateAccount(MsgPack msgPack) {
+        String senderUid = String.valueOf(msgPack.getSenderUid());
+        String receiverUid = String.valueOf(msgPack.getReceiverUid());
+        if (!StrUtil.isEmpty(senderUid) && !senderUid.equals("0")) {
+            MongoDBUtil.saveOne("im_account", IMAccount.builder()
+                    .accountId(senderUid)
+                    .nickName(msgPack.getSenderNickName())
+                    .build());
+        }
+
+        if (!StrUtil.isEmpty(receiverUid) && !receiverUid.equals("0")) {
+            MongoDBUtil.saveOne("im_account", IMAccount.builder()
+                    .accountId(receiverUid)
+                    .nickName(msgPack.getReceiverNickName())
+                    .build());
+        }
     }
 }

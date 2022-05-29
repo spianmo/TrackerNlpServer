@@ -1,6 +1,8 @@
 package org.kirito666.sentiment;
 
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +17,8 @@ import java.util.Objects;
 public class SentimentDto {
     public double credit;
     public int labelCount;
+
+    public Sentiment result;
     public List<Sentiment> labels;
     public List<Sentiment> predictedLabels;
     private static String[] LABELS_EN;
@@ -34,6 +38,12 @@ public class SentimentDto {
         int count = 0;
         for (float item : output) {
             String it = String.format("%.40f", item);
+            if (count == 0) {
+                sentimentDto.result = new Sentiment(LABELS_ZH[count], LABELS_EN[count], item, it);
+            }
+            if (item > sentimentDto.result.predict) {
+                sentimentDto.result = new Sentiment(LABELS_ZH[count], LABELS_EN[count], item, it);
+            }
             sentimentDto.labels.add(new Sentiment(LABELS_ZH[count], LABELS_EN[count], item, it));
             count++;
         }
